@@ -7,7 +7,7 @@ signal direction_changed
 export var max_walk_speed := 3
 export var max_sprint_speed := 7
 export var acceleration := 10
-export var ground_friction := 50
+export var ground_friction := 13
 export var jump_force := 6
 export var camera_rotation_speed := 0.0015
 export var min_camera_rotation := -70
@@ -27,12 +27,12 @@ enum STATE {
 }
 
 var state: int = STATE.IDLE setget set_state, get_state
-var max_speed = max_walk_speed
-var direction = Vector3() setget set_direction, get_direction
-var velocity = Vector3()
-var snap = Vector3.DOWN
-var orientation = Transform()
-var camera_x_rotation = 0.0
+var max_speed := max_walk_speed
+var direction := Vector3() setget set_direction, get_direction
+var velocity := Vector3()
+var snap := Vector3.DOWN
+var orientation := Transform()
+var camera_x_rotation := 0.0
 
 onready var gravity = ProjectSettings.get_setting("physics/3d/default_gravity") * ProjectSettings.get_setting("physics/3d/default_gravity_vector")
 onready var animation_tree = $AnimationTree
@@ -96,7 +96,7 @@ func _state_factory() -> void:
 		set_state(STATE.AIM)
 	elif is_on_floor() and Input.is_action_just_pressed("jump"):
 		set_state(STATE.JUMP)
-	elif is_on_floor() and get_direction() and velocity_length > pow(max_walk_speed, 2) + 0.01: # 0.01 = margin of error
+	elif is_on_floor() and get_direction() and velocity_length > pow(max_sprint_speed, 2) / 2:
 		set_state(STATE.SPRINT)
 	elif is_on_floor() and get_direction() and velocity_length > 0.01:
 		set_state(STATE.WALK)
