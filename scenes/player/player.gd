@@ -169,7 +169,7 @@ func _orientation(delta: float) -> void:
 	var camera_basis = camera_y.global_transform.basis
 	var new_orientation = camera_basis.x * get_direction().x + camera_basis.z * get_direction().z
 	if Input.is_action_pressed("aim"): # Does not use STATE.AIM to allow changing orientation in fall
-		new_orientation = -camera_y.global_transform.basis.z
+		new_orientation = -camera_basis.z
 	if new_orientation:
 		orientation.basis = orientation.basis.slerp(orientation.looking_at(new_orientation, Vector3.UP).basis, delta * 10)
 		model.global_transform.basis = orientation.basis

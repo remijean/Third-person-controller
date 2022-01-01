@@ -1,8 +1,8 @@
 [gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://scenes/level/materials/floor.material" type="Material" id=1]
+[ext_resource path="res://scenes/level/floor.material" type="Material" id=1]
 [ext_resource path="res://scenes/player/player.tscn" type="PackedScene" id=2]
-[ext_resource path="res://scenes/level/materials/wall.material" type="Material" id=3]
+[ext_resource path="res://scenes/level/box.material" type="Material" id=3]
 [ext_resource path="res://scenes/level/level.gd" type="Script" id=4]
 
 [sub_resource type="CubeMesh" id=7]
@@ -20,7 +20,7 @@ __meta__ = {
 }
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( 1, 0, 0, 0, -0.5, 0.866025, 0, -0.866025, -0.5, 0, 10, 0 )
+transform = Transform( 1, 0, 0, 0, -0.819152, 0.573576, 0, -0.573576, -0.819152, 0, 10, 0 )
 shadow_enabled = true
 __meta__ = {
 "_edit_lock_": true
@@ -30,7 +30,10 @@ __meta__ = {
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14, 0 )
 
 [node name="Floor" type="StaticBody" parent="."]
-transform = Transform( 100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -1, 0 )
+transform = Transform( 50, 0, 0, 0, 0.1, 0, 0, 0, 50, 0, -0.1, 0 )
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="MeshInstance" type="MeshInstance" parent="Floor"]
 mesh = SubResource( 7 )
@@ -46,10 +49,13 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Wall" type="StaticBody" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 0 )
+[node name="Box" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 5 )
+__meta__ = {
+"_edit_lock_": true
+}
 
-[node name="MeshInstance" type="MeshInstance" parent="Wall"]
+[node name="MeshInstance" type="MeshInstance" parent="Box"]
 mesh = SubResource( 6 )
 skeleton = NodePath("../..")
 material/0 = ExtResource( 3 )
@@ -57,16 +63,19 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Wall"]
+[node name="CollisionShape" type="CollisionShape" parent="Box"]
 shape = SubResource( 2 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Wall2" type="StaticBody" parent="."]
-transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 6, 2, 5 )
+[node name="Box2" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 5 )
+__meta__ = {
+"_edit_lock_": true
+}
 
-[node name="MeshInstance" type="MeshInstance" parent="Wall2"]
+[node name="MeshInstance" type="MeshInstance" parent="Box2"]
 mesh = SubResource( 6 )
 skeleton = NodePath("../..")
 material/0 = ExtResource( 3 )
@@ -74,16 +83,19 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Wall2"]
+[node name="CollisionShape" type="CollisionShape" parent="Box2"]
 shape = SubResource( 2 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Wall3" type="StaticBody" parent="."]
-transform = Transform( 1.81262, -0.845237, 0, 0.845237, 1.81262, 0, 0, 0, 2, 6, 0.95, 11 )
+[node name="Box3" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 3, 5 )
+__meta__ = {
+"_edit_lock_": true
+}
 
-[node name="MeshInstance" type="MeshInstance" parent="Wall3"]
+[node name="MeshInstance" type="MeshInstance" parent="Box3"]
 mesh = SubResource( 6 )
 skeleton = NodePath("../..")
 material/0 = ExtResource( 3 )
@@ -91,16 +103,19 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Wall3"]
+[node name="CollisionShape" type="CollisionShape" parent="Box3"]
 shape = SubResource( 2 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Wall4" type="StaticBody" parent="."]
-transform = Transform( 1.96962, -0.347296, 0, 0.347296, 1.96962, 0, 0, 0, 2, 6, 0.95, 17 )
+[node name="Box4" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -2, 0.36, -5 )
+__meta__ = {
+"_edit_lock_": true
+}
 
-[node name="MeshInstance" type="MeshInstance" parent="Wall4"]
+[node name="MeshInstance" type="MeshInstance" parent="Box4"]
 mesh = SubResource( 6 )
 skeleton = NodePath("../..")
 material/0 = ExtResource( 3 )
@@ -108,7 +123,27 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Wall4"]
+[node name="CollisionShape" type="CollisionShape" parent="Box4"]
+shape = SubResource( 2 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Box5" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 2, 0.5, -5 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="MeshInstance" type="MeshInstance" parent="Box5"]
+mesh = SubResource( 6 )
+skeleton = NodePath("../..")
+material/0 = ExtResource( 3 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="CollisionShape" type="CollisionShape" parent="Box5"]
 shape = SubResource( 2 )
 __meta__ = {
 "_edit_lock_": true

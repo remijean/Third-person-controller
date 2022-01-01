@@ -1,8 +1,30 @@
 # TPS
-Third-person shooter with Godot game engine.
 
-## Tools
-- Godot: https://godotengine.org/
-- Blender: https://www.blender.org/
-- Godot Game Tools: https://github.com/vini-guerrero/Godot_Game_Tools/
-- Mixamo: https://www.mixamo.com/
+Third-person shooter with Godot 3 game engine.
+
+![Screenshot](assets/screenshot.png)
+
+## Features
+
+- Looking around
+- Walking/sprinting
+- Jumping
+- Aiming
+- Zooming
+
+## Keys
+
+- Walk: `W/A/S/D`
+- Sprint: `Left Shift`
+- Jump: `Space`
+- AIM: `Mouse Right Button`
+- Zoom: `Mouse Wheel`
+- Capture mouse: `Esc`
+- Toggle fullscreen: `Alt+Enter`
+
+## External links
+
+- [Godot](https://godotengine.org/)
+- [Blender](https://www.blender.org/)
+- [Godot Game Tools](https://github.com/vini-guerrero/Godot_Game_Tools/)
+- [Mixamo](https://www.mixamo.com/)

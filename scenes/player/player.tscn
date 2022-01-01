@@ -1,7 +1,7 @@
 [gd_scene load_steps=15 format=2]
 
-[ext_resource path="res://scenes/player/mesh/model.gltf" type="PackedScene" id=1]
-[ext_resource path="res://scenes/player/textures/crosshair.png" type="Texture" id=2]
+[ext_resource path="res://scenes/player/model.gltf" type="PackedScene" id=1]
+[ext_resource path="res://scenes/player/crosshair.png" type="Texture" id=2]
 [ext_resource path="res://scenes/player/player.gd" type="Script" id=3]
 
 [sub_resource type="CapsuleShape" id=37]
