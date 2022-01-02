@@ -28,23 +28,9 @@ __meta__ = {
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14, 0 )
-max_walk_speed = null
-max_crouch_speed = null
-max_sprint_speed = null
-max_roll_speed = null
-acceleration = null
-ground_friction = null
-jump_force = null
-camera_rotation_speed = null
-min_camera_rotation = null
-max_camera_rotation = null
-min_camera_zoom = null
-max_camera_zoom = null
-camera_zoom_factor = null
-camera_zoom_speed = null
 
 [node name="Floor" type="StaticBody" parent="."]
-transform = Transform( 50, 0, 0, 0, 0.1, 0, 0, 0, 50, 0, -0.1, 0 )
+transform = Transform( 25, 0, 0, 0, 1, 0, 0, 0, 25, 0, -1, 0 )
 __meta__ = {
 "_edit_lock_": true
 }
@@ -158,6 +144,66 @@ __meta__ = {
 }
 
 [node name="CollisionShape" type="CollisionShape" parent="Box5"]
+shape = SubResource( 2 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Box6" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 1.5 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="MeshInstance" type="MeshInstance" parent="Box6"]
+mesh = SubResource( 6 )
+skeleton = NodePath("../..")
+material/0 = ExtResource( 3 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="CollisionShape" type="CollisionShape" parent="Box6"]
+shape = SubResource( 2 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Box7" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, -1.5 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="MeshInstance" type="MeshInstance" parent="Box7"]
+mesh = SubResource( 6 )
+skeleton = NodePath("../..")
+material/0 = ExtResource( 3 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="CollisionShape" type="CollisionShape" parent="Box7"]
+shape = SubResource( 2 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Box8" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.5, 0 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="MeshInstance" type="MeshInstance" parent="Box8"]
+mesh = SubResource( 6 )
+skeleton = NodePath("../..")
+material/0 = ExtResource( 3 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="CollisionShape" type="CollisionShape" parent="Box8"]
 shape = SubResource( 2 )
 __meta__ = {
 "_edit_lock_": true

@@ -6,13 +6,14 @@ signal aim_changed
 signal crouch_changed
 signal direction_changed
 
-export var max_walk_speed := 3
-export var max_crouch_speed := 2
-export var max_sprint_speed := 7
-export var max_roll_speed := 8
-export var acceleration := 10
-export var ground_friction := 13
-export var jump_force := 6
+export var max_walk_speed := 3.0
+export var max_crouch_speed := 2.0
+export var max_sprint_speed := 7.0
+export var max_air_speed := 5.0
+export var max_roll_speed := 6.0
+export var acceleration := 10.0
+export var ground_friction := 13.0
+export var jump_force := 6.4
 export var camera_rotation_speed := 0.0015
 export var min_camera_rotation := -70
 export var max_camera_rotation := 70
@@ -160,7 +161,9 @@ func _state_factory() -> void:
 
 func _movement(delta: float) -> void:
 	# Speed
-	if get_crouch():
+	if !is_on_floor() and !is_on_wall():
+		max_speed = max_air_speed
+	elif get_crouch():
 		max_speed = max_crouch_speed
 	elif get_state() == STATE.SPRINT:
 		max_speed = max_sprint_speed
