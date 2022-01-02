@@ -17,10 +17,9 @@ Third-person controller for Godot game engine.
 
 - Walk: `W/A/S/D`
 - Sprint: `Left Shift`
-- Jump: `Space`
-- AIM: `Mouse Right Button`
-- Roll: AIM+`Space`
+- Jump/Roll: `Space`
 - Crouch: `Control`
+- AIM: `Mouse Right Button`
 - Zoom: `Mouse Wheel`
 - Capture mouse: `Esc`
 - Toggle fullscreen: `Alt+Enter`
