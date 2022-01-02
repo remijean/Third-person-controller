@@ -35,10 +35,12 @@ var aim := false setget set_aim, get_aim
 var crouch := false setget set_crouch, get_crouch
 var max_speed := max_walk_speed
 var direction := Vector3() setget set_direction, get_direction
+var orientation := Transform()
 var velocity := Vector3()
 var snap := Vector3.DOWN
-var orientation := Transform()
 var camera_x_rotation := 0.0
+var collision_shape_translation := Vector3()
+var collision_shape_height := 0.0
 
 onready var gravity = ProjectSettings.get_setting("physics/3d/default_gravity") * ProjectSettings.get_setting("physics/3d/default_gravity_vector")
 onready var animation_tree = $AnimationTree
@@ -56,7 +58,6 @@ func set_state(value: int) -> void:
 	if state != value:
 		state = value
 		emit_signal("state_changed")
-
 
 
 func get_state() -> int:
@@ -97,6 +98,7 @@ func get_direction() -> Vector3:
 
 func _ready() -> void:
 	_orientation_init()
+	_collision_shape_init()
 
 
 func _physics_process(delta: float) -> void:
@@ -116,6 +118,11 @@ func _input(event: InputEvent) -> void:
 func _orientation_init() -> void:
 	orientation = model.global_transform
 	orientation.origin = Vector3()
+
+
+func _collision_shape_init() -> void:
+	collision_shape_translation = collision_shape.translation
+	collision_shape_height = collision_shape.shape.height
 
 
 func _state_factory() -> void:
@@ -163,10 +170,10 @@ func _movement(delta: float) -> void:
 		max_speed = max_walk_speed
 
 	# Velocity
-	var camera_basis = camera_y.global_transform.basis
-	var target_velocity = -(camera_basis.x * get_direction().x + camera_basis.z * get_direction().z)
 	if get_direction() and not is_on_wall():
-		var new_velocity = velocity.linear_interpolate(target_velocity * max_speed, acceleration * delta)
+		var camera_basis = camera_y.global_transform.basis
+		var new_velocity = -(camera_basis.x * get_direction().x + camera_basis.z * get_direction().z) * max_speed
+		new_velocity = velocity.linear_interpolate(new_velocity, acceleration * delta)
 		velocity.x = new_velocity.x
 		velocity.z = new_velocity.z
 
@@ -193,7 +200,7 @@ func _orientation(delta: float) -> void:
 	var camera_basis = camera_y.global_transform.basis
 	var new_orientation = camera_basis.x * get_direction().x + camera_basis.z * get_direction().z
 	if get_aim() and get_state() != STATE.ROLL:
-		new_orientation = -camera_basis.z
+		new_orientation = -camera_y.global_transform.basis.z
 	if new_orientation:
 		orientation.basis = orientation.basis.slerp(orientation.looking_at(new_orientation, Vector3.UP).basis, delta * 10)
 		model.global_transform.basis = orientation.basis
@@ -237,14 +244,15 @@ func _update_animation() -> void:
 		STATE.WALK:
 			if get_crouch():
 				animation_tree["parameters/state/current"] = 9
-			elif get_aim() and get_direction().x < 0:
-				animation_tree["parameters/state/current"] = 5
-			elif get_aim() and get_direction().x > 0:
-				animation_tree["parameters/state/current"] = 6
-			elif get_aim() and get_direction().z < 0:
-				animation_tree["parameters/state/current"] = 1
-			elif get_aim() and get_direction().z > 0:
-				animation_tree["parameters/state/current"] = 7
+			elif get_aim():
+				if get_direction().x < 0:
+					animation_tree["parameters/state/current"] = 5
+				elif get_direction().x > 0:
+					animation_tree["parameters/state/current"] = 6
+				elif get_direction().z < 0:
+					animation_tree["parameters/state/current"] = 1
+				elif get_direction().z > 0:
+					animation_tree["parameters/state/current"] = 7
 			else:
 				animation_tree["parameters/state/current"] = 1
 		STATE.IDLE:
@@ -259,18 +267,19 @@ func _update_animation() -> void:
 
 
 func _update_collision_shape() -> void:
-	if get_crouch():
-		collision_shape.shape.height = collision_shape.shape.height / 2
-		collision_shape.translation = collision_shape.translation - Vector3(0, 0.2, 0)
+	if get_crouch() or get_state() == STATE.ROLL:
+		collision_shape.translation = collision_shape_translation - Vector3(0, 0.2, 0)
+		collision_shape.shape.height = collision_shape_height / 2
 	else:
-		collision_shape.shape.height = collision_shape.shape.height * 2
-		collision_shape.translation = collision_shape.translation + Vector3(0, 0.2, 0)
+		collision_shape.translation = collision_shape_translation
+		collision_shape.shape.height = collision_shape_height
 
 
 #### SIGNAL RESPONSES ####
 
 func _on_Player_state_changed() -> void:
 	_update_animation()
+	_update_collision_shape()
 
 
 func _on_Player_direction_changed() -> void:

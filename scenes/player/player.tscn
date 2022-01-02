@@ -39,7 +39,7 @@ input_1/auto_advance = false
 input_2/name = "sprint"
 input_2/auto_advance = false
 input_3/name = "jump"
-input_3/auto_advance = false
+input_3/auto_advance = true
 input_4/name = "fall"
 input_4/auto_advance = false
 input_5/name = "walk-left"
@@ -68,7 +68,7 @@ animation = "walk-right-loop"
 animation = "walk-loop"
 
 [sub_resource type="AnimationNodeBlendTree" id=7]
-graph_offset = Vector2( -69.3264, 729.458 )
+graph_offset = Vector2( -238.159, 404.951 )
 nodes/crouch-idle/node = SubResource( 60 )
 nodes/crouch-idle/position = Vector2( 360, 1080 )
 nodes/crouch-walk/node = SubResource( 61 )

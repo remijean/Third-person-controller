@@ -28,6 +28,20 @@ __meta__ = {
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14, 0 )
+max_walk_speed = null
+max_crouch_speed = null
+max_sprint_speed = null
+max_roll_speed = null
+acceleration = null
+ground_friction = null
+jump_force = null
+camera_rotation_speed = null
+min_camera_rotation = null
+max_camera_rotation = null
+min_camera_zoom = null
+max_camera_zoom = null
+camera_zoom_factor = null
+camera_zoom_speed = null
 
 [node name="Floor" type="StaticBody" parent="."]
 transform = Transform( 50, 0, 0, 0, 0.1, 0, 0, 0, 50, 0, -0.1, 0 )
