@@ -34,6 +34,7 @@ enum STATE {
 var state: int = STATE.IDLE setget set_state, get_state
 var aim := false setget set_aim, get_aim
 var crouch := false setget set_crouch, get_crouch
+var hit_ceiling := 0
 var max_speed := max_walk_speed
 var direction := Vector3() setget set_direction, get_direction
 var orientation := Transform()
@@ -47,6 +48,7 @@ onready var gravity = ProjectSettings.get_setting("physics/3d/default_gravity") 
 onready var animation_tree = $AnimationTree
 onready var model = $Model
 onready var collision_shape = $CollisionShape
+onready var hit_box_celling = $HitBoxCelling
 onready var camera_y = $CameraY
 onready var camera_x = $CameraY/CameraX
 onready var camera_spring_arm = $CameraY/CameraX/SpringArm
@@ -75,8 +77,8 @@ func get_aim() -> bool:
 	return aim
 
 
-func set_crouch(value: bool) -> void:
-	if crouch != value:
+func set_crouch(value: bool, force := false) -> void:
+	if crouch != value and (not hit_ceiling or force):
 		crouch = value
 		emit_signal("crouch_changed")
 
@@ -130,12 +132,13 @@ func _state_factory() -> void:
 	# AIM
 	if Input.is_action_just_pressed("aim"):
 		set_crouch(false)
-		set_aim(true)
+		if not get_crouch():
+			set_aim(true)
 	elif Input.is_action_just_released("aim"):
 		set_aim(false)
 
 	# Crouch
-	if Input.is_action_just_pressed("crouch") and !get_aim():
+	if Input.is_action_just_pressed("crouch") and not get_aim():
 		set_crouch(!get_crouch())
 
 	# State
@@ -143,25 +146,28 @@ func _state_factory() -> void:
 		if is_on_floor():
 			if get_direction() and Input.is_action_just_pressed("jump") and get_aim():
 				set_crouch(false)
-				set_state(STATE.ROLL)
-			elif Input.is_action_just_pressed("jump") and !get_aim():
+				if not get_crouch():
+					set_state(STATE.ROLL)
+			elif Input.is_action_just_pressed("jump") and not get_aim():
 				set_crouch(false)
-				set_state(STATE.JUMP)
-			elif Input.is_action_pressed("sprint") and get_direction() and !get_aim():
+				if not get_crouch():
+					set_state(STATE.JUMP)
+			elif Input.is_action_pressed("sprint") and get_direction() and not get_aim():
 				set_crouch(false)
-				set_state(STATE.SPRINT)
+				if not get_crouch():
+					set_state(STATE.SPRINT)
 			elif Vector3(velocity.x, 0, velocity.z).length_squared() > 0.01 and get_direction():
 				set_state(STATE.WALK)
 			else:
 				set_state(STATE.IDLE)
 		else:
-			set_crouch(false)
+			set_crouch(false, true)
 			set_state(STATE.FALL)
 
 
 func _movement(delta: float) -> void:
 	# Speed
-	if !is_on_floor() and !is_on_wall():
+	if not is_on_floor() and not is_on_wall():
 		max_speed = max_air_speed
 	elif get_crouch():
 		max_speed = max_crouch_speed
@@ -296,3 +302,11 @@ func _on_Player_crouch_changed() -> void:
 
 func _on_Player_aim_changed() -> void:
 	_update_animation()
+
+
+func _on_HitBoxCelling_body_entered(_body: Node) -> void:
+	hit_ceiling += 1
+
+
+func _on_HitBoxCelling_body_exited(_body: Node) -> void:
+	hit_ceiling -= 1

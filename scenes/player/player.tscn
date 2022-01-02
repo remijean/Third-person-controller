@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://scenes/player/model.gltf" type="PackedScene" id=1]
 [ext_resource path="res://scenes/player/crosshair.png" type="Texture" id=2]
@@ -7,6 +7,9 @@
 [sub_resource type="CapsuleShape" id=45]
 radius = 0.5
 height = 0.8
+
+[sub_resource type="SphereShape" id=72]
+radius = 0.25
 
 [sub_resource type="AnimationNodeAnimation" id=60]
 animation = "crouch-idle-loop"
@@ -97,6 +100,7 @@ nodes/walk-right/position = Vector2( 360, 840 )
 node_connections = [ "state", 0, "idle", "state", 1, "walk", "state", 2, "sprint", "state", 3, "jump", "state", 4, "fall", "state", 5, "walk-left", "state", 6, "walk-right", "state", 7, "walk-back", "state", 8, "crouch-idle", "state", 9, "crouch-walk", "state", 10, "roll", "output", 0, "state" ]
 
 [node name="Player" type="KinematicBody"]
+collision_layer = 2
 script = ExtResource( 3 )
 
 [node name="Model" parent="." instance=ExtResource( 1 )]
@@ -104,6 +108,14 @@ script = ExtResource( 3 )
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.767332, 0 )
 shape = SubResource( 45 )
+
+[node name="HitBoxCelling" type="Area" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.418, 0 )
+collision_layer = 2
+
+[node name="CollisionShape" type="CollisionShape" parent="HitBoxCelling"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 72 )
 
 [node name="CameraY" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0 )
@@ -144,5 +156,7 @@ __meta__ = {
 [connection signal="crouch_changed" from="." to="." method="_on_Player_crouch_changed"]
 [connection signal="direction_changed" from="." to="." method="_on_Player_direction_changed"]
 [connection signal="state_changed" from="." to="." method="_on_Player_state_changed"]
+[connection signal="body_entered" from="HitBoxCelling" to="." method="_on_HitBoxCelling_body_entered"]
+[connection signal="body_exited" from="HitBoxCelling" to="." method="_on_HitBoxCelling_body_exited"]
 
 [editable path="Model"]
