@@ -42,7 +42,6 @@ var camera_x_rotation := 0.0
 
 onready var gravity = ProjectSettings.get_setting("physics/3d/default_gravity") * ProjectSettings.get_setting("physics/3d/default_gravity_vector")
 onready var animation_tree = $AnimationTree
-onready var animation_player = $AnimationPlayer
 onready var model = $Model
 onready var collision_shape = $CollisionShape
 onready var camera_y = $CameraY
@@ -57,6 +56,7 @@ func set_state(value: int) -> void:
 	if state != value:
 		state = value
 		emit_signal("state_changed")
+
 
 
 func get_state() -> int:
@@ -131,24 +131,24 @@ func _state_factory() -> void:
 		set_crouch(!get_crouch())
 
 	# State
-	if is_on_floor():
-		if animation_tree["parameters/state/current"] != 10: # Waits for the end of the rolling animation
-			if Input.is_action_just_pressed("jump") and get_aim():
+	if animation_tree["parameters/state/current"] != 10: # Waits for the end of the rolling animation
+		if is_on_floor():
+			if get_direction() and Input.is_action_just_pressed("jump") and get_aim():
 				set_crouch(false)
 				set_state(STATE.ROLL)
-			elif Input.is_action_just_pressed("jump"):
+			elif Input.is_action_just_pressed("jump") and !get_aim():
 				set_crouch(false)
 				set_state(STATE.JUMP)
-			elif get_direction() and Input.is_action_pressed("sprint") and !get_aim():
+			elif Input.is_action_pressed("sprint") and get_direction() and !get_aim():
 				set_crouch(false)
 				set_state(STATE.SPRINT)
-			elif get_direction() and Vector3(velocity.x, 0, velocity.z).length_squared() > 0.01:
+			elif Vector3(velocity.x, 0, velocity.z).length_squared() > 0.01 and get_direction():
 				set_state(STATE.WALK)
 			else:
 				set_state(STATE.IDLE)
-	else:
-		set_crouch(false)
-		set_state(STATE.FALL)
+		else:
+			set_crouch(false)
+			set_state(STATE.FALL)
 
 
 func _movement(delta: float) -> void:
