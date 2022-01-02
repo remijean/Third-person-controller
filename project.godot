@@ -20,7 +20,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="TPS"
+config/name="Third-person controller"
 run/main_scene="res://scenes/level/level.tscn"
 config/icon="res://icon.png"
 

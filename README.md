@@ -1,6 +1,6 @@
-# TPS
+# Third-person controller
 
-Third-person shooter with Godot 3 game engine.
+Third-person controller for Godot game engine.
 
 ![Screenshot](assets/screenshot.png)
 
