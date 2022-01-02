@@ -2,10 +2,14 @@ class_name Player
 extends KinematicBody
 
 signal state_changed
+signal aim_changed
+signal crouch_changed
 signal direction_changed
 
 export var max_walk_speed := 3
+export var max_crouch_speed := 2
 export var max_sprint_speed := 7
+export var max_roll_speed := 8
 export var acceleration := 10
 export var ground_friction := 13
 export var jump_force := 6
@@ -22,11 +26,13 @@ enum STATE {
 	WALK,
 	SPRINT,
 	JUMP,
-	AIM,
+	ROLL,
 	FALL,
 }
 
 var state: int = STATE.IDLE setget set_state, get_state
+var aim := false setget set_aim, get_aim
+var crouch := false setget set_crouch, get_crouch
 var max_speed := max_walk_speed
 var direction := Vector3() setget set_direction, get_direction
 var velocity := Vector3()
@@ -36,7 +42,9 @@ var camera_x_rotation := 0.0
 
 onready var gravity = ProjectSettings.get_setting("physics/3d/default_gravity") * ProjectSettings.get_setting("physics/3d/default_gravity_vector")
 onready var animation_tree = $AnimationTree
+onready var animation_player = $AnimationPlayer
 onready var model = $Model
+onready var collision_shape = $CollisionShape
 onready var camera_y = $CameraY
 onready var camera_x = $CameraY/CameraX
 onready var camera_spring_arm = $CameraY/CameraX/SpringArm
@@ -53,6 +61,26 @@ func set_state(value: int) -> void:
 
 func get_state() -> int:
 	return state
+
+
+func set_aim(value: bool) -> void:
+	if aim != value:
+		aim = value
+		emit_signal("aim_changed")
+
+
+func get_aim() -> bool:
+	return aim
+
+
+func set_crouch(value: bool) -> void:
+	if crouch != value:
+		crouch = value
+		emit_signal("crouch_changed")
+
+
+func get_crouch() -> bool:
+	return crouch
 
 
 func set_direction(value: Vector3) -> void:
@@ -91,57 +119,53 @@ func _orientation_init() -> void:
 
 
 func _state_factory() -> void:
-	var velocity_length = Vector3(velocity.x, 0, velocity.z).length_squared()
-	if Input.is_action_pressed("aim") and get_state() != STATE.FALL:
-		set_state(STATE.AIM)
-	elif is_on_floor() and Input.is_action_just_pressed("jump"):
-		set_state(STATE.JUMP)
-	elif is_on_floor() and get_direction() and velocity_length > pow(max_sprint_speed, 2) / 2:
-		set_state(STATE.SPRINT)
-	elif is_on_floor() and get_direction() and velocity_length > 0.01:
-		set_state(STATE.WALK)
-	elif is_on_floor():
-		set_state(STATE.IDLE)
+	# AIM
+	if Input.is_action_just_pressed("aim"):
+		set_crouch(false)
+		set_aim(true)
+	elif Input.is_action_just_released("aim"):
+		set_aim(false)
+
+	# Crouch
+	if Input.is_action_just_pressed("crouch") and !get_aim():
+		set_crouch(!get_crouch())
+
+	# State
+	if is_on_floor():
+		if animation_tree["parameters/state/current"] != 10: # Waits for the end of the rolling animation
+			if Input.is_action_just_pressed("jump") and get_aim():
+				set_crouch(false)
+				set_state(STATE.ROLL)
+			elif Input.is_action_just_pressed("jump"):
+				set_crouch(false)
+				set_state(STATE.JUMP)
+			elif get_direction() and Input.is_action_pressed("sprint") and !get_aim():
+				set_crouch(false)
+				set_state(STATE.SPRINT)
+			elif get_direction() and Vector3(velocity.x, 0, velocity.z).length_squared() > 0.01:
+				set_state(STATE.WALK)
+			else:
+				set_state(STATE.IDLE)
 	else:
+		set_crouch(false)
 		set_state(STATE.FALL)
 
 
-func _update_animation() -> void:
-	match get_state():
-		STATE.JUMP:
-			animation_tree["parameters/state/current"] = 3
-		STATE.SPRINT:
-			animation_tree["parameters/state/current"] = 2
-		STATE.WALK:
-			animation_tree["parameters/state/current"] = 1
-		STATE.IDLE:
-			animation_tree["parameters/state/current"] = 0
-		STATE.AIM:
-			if get_direction().x < 0:
-				animation_tree["parameters/state/current"] = 5
-			elif get_direction().x > 0:
-				animation_tree["parameters/state/current"] = 6
-			elif get_direction().z < 0:
-				animation_tree["parameters/state/current"] = 1
-			elif get_direction().z > 0:
-				animation_tree["parameters/state/current"] = 7
-			else:
-				animation_tree["parameters/state/current"] = 0
-		STATE.FALL:
-			animation_tree["parameters/state/current"] = 4
-
-
 func _movement(delta: float) -> void:
-	# Sprint
-	if Input.is_action_pressed("sprint") and get_state() != STATE.AIM:
+	# Speed
+	if get_crouch():
+		max_speed = max_crouch_speed
+	elif get_state() == STATE.SPRINT:
 		max_speed = max_sprint_speed
+	elif get_state() == STATE.ROLL:
+		max_speed = max_roll_speed
 	else:
 		max_speed = max_walk_speed
 
 	# Velocity
+	var camera_basis = camera_y.global_transform.basis
+	var target_velocity = -(camera_basis.x * get_direction().x + camera_basis.z * get_direction().z)
 	if get_direction() and not is_on_wall():
-		var camera_basis = camera_y.global_transform.basis
-		var target_velocity = -(camera_basis.x * get_direction().x + camera_basis.z * get_direction().z)
 		var new_velocity = velocity.linear_interpolate(target_velocity * max_speed, acceleration * delta)
 		velocity.x = new_velocity.x
 		velocity.z = new_velocity.z
@@ -168,7 +192,7 @@ func _movement(delta: float) -> void:
 func _orientation(delta: float) -> void:
 	var camera_basis = camera_y.global_transform.basis
 	var new_orientation = camera_basis.x * get_direction().x + camera_basis.z * get_direction().z
-	if Input.is_action_pressed("aim"): # Does not use STATE.AIM to allow changing orientation in fall
+	if get_aim() and get_state() != STATE.ROLL:
 		new_orientation = -camera_basis.z
 	if new_orientation:
 		orientation.basis = orientation.basis.slerp(orientation.looking_at(new_orientation, Vector3.UP).basis, delta * 10)
@@ -202,6 +226,47 @@ func _camera_zoom(event: InputEvent) -> void:
 		camera_spring_arm.spring_length = clamp(spring_length + camera_zoom_factor, min_camera_zoom, max_camera_zoom)
 
 
+func _update_animation() -> void:
+	match get_state():
+		STATE.JUMP:
+			animation_tree["parameters/state/current"] = 3
+		STATE.ROLL:
+			animation_tree["parameters/state/current"] = 10
+		STATE.SPRINT:
+			animation_tree["parameters/state/current"] = 2
+		STATE.WALK:
+			if get_crouch():
+				animation_tree["parameters/state/current"] = 9
+			elif get_aim() and get_direction().x < 0:
+				animation_tree["parameters/state/current"] = 5
+			elif get_aim() and get_direction().x > 0:
+				animation_tree["parameters/state/current"] = 6
+			elif get_aim() and get_direction().z < 0:
+				animation_tree["parameters/state/current"] = 1
+			elif get_aim() and get_direction().z > 0:
+				animation_tree["parameters/state/current"] = 7
+			else:
+				animation_tree["parameters/state/current"] = 1
+		STATE.IDLE:
+			if get_crouch():
+				animation_tree["parameters/state/current"] = 8
+			elif get_aim():
+				animation_tree["parameters/state/current"] = 0
+			else:
+				animation_tree["parameters/state/current"] = 0
+		STATE.FALL:
+			animation_tree["parameters/state/current"] = 4
+
+
+func _update_collision_shape() -> void:
+	if get_crouch():
+		collision_shape.shape.height = collision_shape.shape.height / 2
+		collision_shape.translation = collision_shape.translation - Vector3(0, 0.2, 0)
+	else:
+		collision_shape.shape.height = collision_shape.shape.height * 2
+		collision_shape.translation = collision_shape.translation + Vector3(0, 0.2, 0)
+
+
 #### SIGNAL RESPONSES ####
 
 func _on_Player_state_changed() -> void:
@@ -209,4 +274,13 @@ func _on_Player_state_changed() -> void:
 
 
 func _on_Player_direction_changed() -> void:
+	_update_animation()
+
+
+func _on_Player_crouch_changed() -> void:
+	_update_animation()
+	_update_collision_shape()
+
+
+func _on_Player_aim_changed() -> void:
 	_update_animation()
